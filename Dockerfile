@@ -12,6 +12,14 @@ RUN dotnet publish NzbDrone.Console/Sonarr.Console.csproj \
     --self-contained false \
     --output /app/bin \
     /p:RunAnalyzers=false \
+    /p:StyleCopEnabled=false && \
+    dotnet publish NzbDrone.Mono/Sonarr.Mono.csproj \
+    --configuration Release \
+    --framework net10.0 \
+    --runtime linux-x64 \
+    --self-contained false \
+    --output /app/bin \
+    /p:RunAnalyzers=false \
     /p:StyleCopEnabled=false
 
 # Stage 2: Build frontend
@@ -25,7 +33,7 @@ COPY frontend/ ./frontend/
 RUN yarn build
 
 # Stage 3: Runtime image
-FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 RUN apt-get update && apt-get install -y \
     curl \

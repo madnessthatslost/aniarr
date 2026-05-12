@@ -89,7 +89,9 @@ namespace NzbDrone.Core.MetadataSource.AniDB
                     AniDbId = aniDbId,
                     OriginalLanguage = Language.Japanese,
                     SeriesType = SeriesTypes.Anime,
-                    Monitored = true
+                    Monitored = true,
+                    Ratings = new Ratings(),
+                    Genres = new List<string>()
                 };
 
                 stub.Title = PickTitle(titles, "en", "official")
@@ -160,6 +162,8 @@ namespace NzbDrone.Core.MetadataSource.AniDB
             series.AniDbId = (int?)root.Attribute("id") ?? 0;
             series.OriginalLanguage = Language.Japanese;
             series.SeriesType = SeriesTypes.Anime;
+            series.Ratings = new Ratings();
+            series.Genres = new List<string>();
 
             // Cross-reference IDs from <resources>
             foreach (var resource in root.Descendants("resource"))
