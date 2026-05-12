@@ -16,10 +16,8 @@ RUN dotnet publish NzbDrone.Console/Sonarr.Console.csproj \
 FROM node:20-alpine AS build-frontend
 WORKDIR /frontend
 
-COPY frontend/package.json frontend/yarn.lock ./
-RUN yarn install --frozen-lockfile
-
 COPY frontend/ ./
+RUN yarn install
 RUN yarn build
 
 # Stage 3: Runtime image
