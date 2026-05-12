@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-backend
 WORKDIR /src
 
 COPY src/ ./
+COPY Logo/ /Logo/
 RUN dotnet restore Sonarr.sln --no-cache
 RUN dotnet publish NzbDrone.Console/Sonarr.Console.csproj \
     --configuration Release \
