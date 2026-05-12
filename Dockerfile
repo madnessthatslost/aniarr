@@ -14,10 +14,12 @@ RUN dotnet publish NzbDrone.Console/Sonarr.Console.csproj \
 
 # Stage 2: Build frontend
 FROM node:20-alpine AS build-frontend
-WORKDIR /frontend
+WORKDIR /app
 
-COPY frontend/ ./
-RUN yarn install
+COPY package.json yarn.lock .yarnrc tsconfig.json ./
+RUN yarn install --frozen-lockfile
+
+COPY frontend/ ./frontend/
 RUN yarn build
 
 # Stage 3: Runtime image
@@ -37,7 +39,7 @@ ENV SONARR_BRANCH=main \
 WORKDIR /app
 
 COPY --from=build-backend /app/bin ./
-COPY --from=build-frontend /frontend/build ./UI/
+COPY --from=build-frontend /app/_output/UI ./UI/
 
 EXPOSE 8989
 
