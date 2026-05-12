@@ -1,5 +1,8 @@
 services:
   aniarr:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: aniarr:latest
     container_name: aniarr
     restart: unless-stopped
