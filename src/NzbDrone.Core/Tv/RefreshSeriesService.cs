@@ -63,7 +63,17 @@ namespace NzbDrone.Core.Tv
 
             try
             {
-                var tuple = _seriesInfo.GetSeriesInfo(series.TvdbId);
+                Tuple<Series, List<Episode>> tuple;
+
+                if (series.TvdbId == 0 && series.AniDbId > 0)
+                {
+                    tuple = _seriesInfo.GetSeriesInfoByAniDbId(series.AniDbId);
+                }
+                else
+                {
+                    tuple = _seriesInfo.GetSeriesInfo(series.TvdbId);
+                }
+
                 seriesInfo = tuple.Item1;
                 episodes = tuple.Item2;
             }
@@ -95,6 +105,7 @@ namespace NzbDrone.Core.Tv
             series.ImdbId = seriesInfo.ImdbId;
             series.MalIds = seriesInfo.MalIds;
             series.AniListIds = seriesInfo.AniListIds;
+            series.AniDbId = seriesInfo.AniDbId;
             series.AirTime = seriesInfo.AirTime;
             series.Overview = seriesInfo.Overview;
             series.OriginalLanguage = seriesInfo.OriginalLanguage;

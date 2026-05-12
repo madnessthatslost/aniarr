@@ -12,6 +12,7 @@ using NzbDrone.Core.DataAugmentation.DailySeries;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
+using NzbDrone.Core.MetadataSource.AniDB;
 using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Tv;
@@ -25,11 +26,13 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
         private readonly ISeriesService _seriesService;
         private readonly IDailySeriesService _dailySeriesService;
         private readonly IHttpRequestBuilderFactory _requestBuilder;
+        private readonly IAniDBClient _aniDBClient;
 
         public SkyHookProxy(IHttpClient httpClient,
                             ISonarrCloudRequestBuilder requestBuilder,
                             ISeriesService seriesService,
                             IDailySeriesService dailySeriesService,
+                            IAniDBClient aniDBClient,
                             Logger logger)
         {
             _httpClient = httpClient;
@@ -37,7 +40,12 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             _logger = logger;
             _seriesService = seriesService;
             _dailySeriesService = dailySeriesService;
-            _requestBuilder = requestBuilder.SkyHookTvdb;
+            _aniDBClient = aniDBClient;
+        }
+
+        public Tuple<Series, List<Episode>> GetSeriesInfoByAniDbId(int aniDbId)
+        {
+            return _aniDBClient.GetSeriesInfo(aniDbId);
         }
 
         public Tuple<Series, List<Episode>> GetSeriesInfo(int tvdbSeriesId)
@@ -98,6 +106,11 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             return results;
         }
 
+        public List<Series> SearchForNewSeriesByAniDbId(int aniDbId)
+        {
+            return _aniDBClient.SearchById(aniDbId);
+        }
+
         public List<Series> SearchForNewSeriesByTmdbId(int tmdbId)
         {
             var results = SearchForNewSeries($"tmdb:{tmdbId}");
@@ -115,6 +128,18 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             try
             {
                 var lowerTitle = title.ToLowerInvariant();
+
+                if (lowerTitle.StartsWith("anidb:") || lowerTitle.StartsWith("anidbid:"))
+                {
+                    var slug = lowerTitle.Split(':')[1].Trim();
+
+                    if (slug.IsNullOrWhiteSpace() || slug.Any(char.IsWhiteSpace) || !int.TryParse(slug, out var aniDbId) || aniDbId <= 0)
+                    {
+                        return new List<Series>();
+                    }
+
+                    return _aniDBClient.SearchById(aniDbId);
+                }
 
                 if (lowerTitle.StartsWith("tvdb:") || lowerTitle.StartsWith("tvdbid:"))
                 {
@@ -202,6 +227,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
             series.ImdbId = show.ImdbId;
             series.MalIds = show.MalIds;
             series.AniListIds = show.AniListIds;
+            series.AniDbId = show.AniDbId;
             series.Title = show.Title;
             series.CleanTitle = Parser.Parser.CleanSeriesTitle(show.Title);
             series.SortTitle = SeriesTitleNormalizer.Normalize(show.Title, show.TvdbId);

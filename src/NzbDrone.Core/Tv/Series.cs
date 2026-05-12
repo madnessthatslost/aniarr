@@ -28,6 +28,7 @@ namespace NzbDrone.Core.Tv
         public int TmdbId { get; set; }
         public HashSet<int> MalIds { get; set; }
         public HashSet<int> AniListIds { get; set; }
+        public int AniDbId { get; set; }
         public string Title { get; set; }
         public string CleanTitle { get; set; }
         public string SortTitle { get; set; }
