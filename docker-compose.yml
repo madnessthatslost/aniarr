@@ -1,9 +1,6 @@
 services:
   aniarr:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: aniarr:latest
+    image: madnessthatslost/aniarr:latest
     container_name: aniarr
     restart: unless-stopped
     ports:
