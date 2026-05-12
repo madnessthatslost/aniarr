@@ -6,6 +6,7 @@ COPY src/ ./
 RUN dotnet restore Sonarr.sln --no-cache
 RUN dotnet publish NzbDrone.Console/Sonarr.Console.csproj \
     --configuration Release \
+    --framework net10.0 \
     --runtime linux-x64 \
     --self-contained false \
     --output /app/bin \
